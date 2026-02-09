@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oddfar.campus.framework.mapper.LightEnergyMapper">
+
+    <select id="getTotal" resultType="com.oddfar.campus.common.domain.vo.SmartDisplayTotalVo">
+        select sum(current_energy) as currentEnergy,
+               sum(saving_energy)  as savingEnergy
+        from light_energy
+        where chart_time >= #{startTime}
+          and chart_time <![CDATA[<=]]>  #{endTime}
+          <if test="parkId != null">
+              and park_id = #{parkId}
+          </if>
+    </select>
+</mapper>

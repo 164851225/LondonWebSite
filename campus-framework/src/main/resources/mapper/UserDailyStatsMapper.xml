@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oddfar.campus.framework.mapper.UserDailyStatsMapper">
+    <resultMap type="com.oddfar.campus.common.domain.entity.UserDailyStatsEntity" id="UserDailyStatsResult">
+        <id property="statsId" column="stats_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="webId" column="web_id"/>
+        <result property="statsDate" column="stats_date"/>
+        <result property="visitCount" column="visit_count"/>
+        <result property="totalDuration" column="total_duration"/>
+        <result property="avgDuration" column="avg_duration"/>
+        <result property="pageCount" column="page_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+</mapper>

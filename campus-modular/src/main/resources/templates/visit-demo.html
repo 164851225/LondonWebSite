@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>访问统计演示页面</title>
+    <script src="/js/visit-tracker.js"></script>
+</head>
+<body>
+    <h1>用户访问统计演示</h1>
+    
+    <div>
+        <h2>当前页面统计信息</h2>
+        <button onclick="showTodayStats()">显示今日统计</button>
+        <button onclick="showMonthlyStats()">显示月度统计</button>
+        <div id="stats-result"></div>
+    </div>
+
+    <div>
+        <h2>页面内容区域</h2>
+        <p>请在此页面进行各种操作，系统会自动记录您的访问行为。</p>
+        <ul>
+            <li>页面加载时自动记录访问</li>
+            <li>每秒发送心跳检测用户活跃度</li>
+            <li>鼠标移动、点击等操作会被识别为活跃状态</li>
+            <li>超过5分钟的访问时长将不再记录</li>
+        </ul>
+    </div>
+
+    <script>
+        // 初始化访问追踪器
+        const tracker = new VisitTracker({
+            userId: 1, // 示例用户ID
+            webId: 'demo_website', // 网站ID
+            apiUrl: '/system/visit' // API路径
+        });
+
+        // 显示今日统计
+        async function showTodayStats() {
+            const result = await tracker.getTodayStats();
+            if (result && result.code === 200) {
+                document.getElementById('stats-result').innerHTML = `
+                    <h3>今日访问统计</h3>
+                    <p>访问次数: ${result.data.todayVisitCount || 0}</p>
+                    <p>总停留时长: ${result.data.todayTotalDuration || 0} 秒</p>
+                    <p>平均停留时长: ${Math.round(result.data.todayAvgDuration || 0)} 秒</p>
+                `;
+            }
+        }
+
+        // 显示月度统计
+        async function showMonthlyStats() {
+            const result = await tracker.getMonthlyStats();
+            if (result && result.code === 200) {
+                document.getElementById('stats-result').innerHTML = `
+                    <h3>月度访问统计</h3>
+                    <p>本月访问: ${result.data.monthlyVisitCount || 0} 次</p>
+                    <p>上月访问: ${result.data.lastMonthVisitCount || 0} 次</p>
+                    <p>环比增长: ${result.data.monthGrowthRate || 0}%</p>
+                `;
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('访问统计已启动');
+        });
+    </script>
+</body>
+</html>
