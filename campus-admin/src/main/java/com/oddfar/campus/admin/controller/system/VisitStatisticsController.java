@@ -32,7 +32,7 @@ public class VisitStatisticsController {
     @PostMapping("/record")
     public R recordVisit(@RequestBody VisitRecordDTO dto) {
         try {
-            UserVisitRecordEntity record = visitStatisticsService.recordVisit(dto.getUserId(), dto.getWebId(), dto.getPageUrl(), dto.getPageTitle());
+            UserVisitRecordEntity record = visitStatisticsService.recordVisit( dto.getWebId(), dto.getPageUrl(), dto.getPageTitle());
             return R.ok("访问记录成功", record.getVisitId());
         } catch (Exception e) {
             log.error("记录访问异常", e);
@@ -64,7 +64,7 @@ public class VisitStatisticsController {
     @PostMapping("/today-stats")
     public R getTodayStats(@RequestBody VisitStatsQueryDTO dto) {
         try {
-            VisitStatsVO stats = visitStatisticsService.getUserTodayStats(dto.getUserId(), dto.getWebId());
+            VisitStatsVO stats = visitStatisticsService.getUserTodayStats( dto.getWebId());
             return R.ok(stats);
         } catch (Exception e) {
             log.error("获取今日统计异常", e);
@@ -80,7 +80,7 @@ public class VisitStatisticsController {
     @PostMapping("/avg-duration")
     public R getAvgDuration(@RequestBody VisitStatsQueryDTO dto) {
         try {
-            Double avgDuration = visitStatisticsService.getUserAvgDuration(dto.getUserId(), dto.getWebId(), dto.getStartDate(), dto.getEndDate());
+            Double avgDuration = visitStatisticsService.getUserAvgDuration( dto.getWebId(), dto.getStartDate(), dto.getEndDate());
             return R.ok(avgDuration);
         } catch (Exception e) {
             log.error("获取平均时长异常", e);
@@ -96,7 +96,7 @@ public class VisitStatisticsController {
     @PostMapping("/monthly-stats")
     public R getMonthlyStats(@RequestBody VisitStatsQueryDTO dto) {
         try {
-            VisitStatsVO stats = visitStatisticsService.getMonthlyVisitStats(dto.getUserId(), dto.getWebId());
+            VisitStatsVO stats = visitStatisticsService.getMonthlyVisitStats( dto.getWebId());
             return R.ok(stats);
         } catch (Exception e) {
             log.error("获取月度统计异常", e);
@@ -113,7 +113,7 @@ public class VisitStatisticsController {
     public R getVisitTrend(@RequestBody VisitStatsQueryDTO dto) {
         try {
             List<VisitStatsVO.TrendDataVO> trendData = visitStatisticsService.getVisitTrend(
-                dto.getUserId(), 
+                 
                 dto.getWebId(), 
                 dto.getPeriodType(), 
                 dto.getStartDate(), 

@@ -39,9 +39,9 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
 
     @Override
     @Transactional
-    public UserVisitRecordEntity recordVisit(Long userId, String webId, String pageUrl, String pageTitle) {
+    public UserVisitRecordEntity recordVisit( String webId, String pageUrl, String pageTitle) {
         try {
-            UserVisitRecordEntity record = new UserVisitRecordEntity(userId, webId, pageUrl);
+            UserVisitRecordEntity record = new UserVisitRecordEntity( webId, pageUrl);
             record.setPageTitle(pageTitle);
             
             // 获取客户端信息
@@ -57,7 +57,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
             visitRecordMapper.insert(record);
             
             // 更新当日统计数据
-            updateDailyStats(userId, webId, new Date());
+            updateDailyStats( webId, new Date());
             
             return record;
         } catch (Exception e) {
@@ -78,24 +78,22 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
             visitRecordMapper.updateById(record);
             
             // 更新当日统计数据
-            updateDailyStats(record.getUserId(), record.getWebId(), record.getVisitTime());
+            updateDailyStats( record.getWebId(), record.getVisitTime());
         } catch (Exception e) {
             log.error("更新停留时长失败", e);
         }
     }
 
     @Override
-    public VisitStatsVO getUserTodayStats(Long userId, String webId) {
+    public VisitStatsVO getUserTodayStats( String webId) {
         Date today = getToday();
         UserDailyStatsEntity todayStats = dailyStatsMapper.selectOne(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getUserId, userId)
                 .eq(UserDailyStatsEntity::getWebId, webId)
                 .eq(UserDailyStatsEntity::getStatsDate, today)
         );
         
         VisitStatsVO vo = new VisitStatsVO();
-        vo.setUserId(userId);
         vo.setWebId(webId);
         vo.setStatsDate(today);
         
@@ -110,10 +108,9 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     }
 
     @Override
-    public Double getUserAvgDuration(Long userId, String webId, Date startDate, Date endDate) {
+    public Double getUserAvgDuration( String webId, Date startDate, Date endDate) {
         List<UserDailyStatsEntity> statsList = dailyStatsMapper.selectList(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getUserId, userId)
                 .eq(UserDailyStatsEntity::getWebId, webId)
                 .ge(UserDailyStatsEntity::getStatsDate, startDate)
                 .le(UserDailyStatsEntity::getStatsDate, endDate)
@@ -131,7 +128,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     }
 
     @Override
-    public VisitStatsVO getMonthlyVisitStats(Long userId, String webId) {
+    public VisitStatsVO getMonthlyVisitStats( String webId) {
         Date currentMonthStart = getMonthStart();
         Date currentMonthEnd = getMonthEnd();
         Date lastMonthStart = getLastMonthStart();
@@ -140,7 +137,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         // 本月数据
         List<UserDailyStatsEntity> currentMonthStats = dailyStatsMapper.selectList(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getUserId, userId)
                 .eq(UserDailyStatsEntity::getWebId, webId)
                 .ge(UserDailyStatsEntity::getStatsDate, currentMonthStart)
                 .le(UserDailyStatsEntity::getStatsDate, currentMonthEnd)
@@ -149,7 +145,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         // 上月数据
         List<UserDailyStatsEntity> lastMonthStats = dailyStatsMapper.selectList(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getUserId, userId)
                 .eq(UserDailyStatsEntity::getWebId, webId)
                 .ge(UserDailyStatsEntity::getStatsDate, lastMonthStart)
                 .le(UserDailyStatsEntity::getStatsDate, lastMonthEnd)
@@ -171,7 +166,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         }
         
         VisitStatsVO vo = new VisitStatsVO();
-        vo.setUserId(userId);
         vo.setWebId(webId);
         vo.setMonthlyVisitCount(currentMonthTotal);
         vo.setLastMonthVisitCount(lastMonthTotal);
@@ -181,19 +175,19 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     }
 
     @Override
-    public List<VisitStatsVO.TrendDataVO> getVisitTrend(Long userId, String webId, String periodType, Date startDate, Date endDate) {
+    public List<VisitStatsVO.TrendDataVO> getVisitTrend( String webId, String periodType, Date startDate, Date endDate) {
         List<VisitStatsVO.TrendDataVO> trendData = new ArrayList<>();
         
         try {
             switch (periodType.toLowerCase()) {
                 case "hour": // 按小时统计
-                    trendData = getHourTrendData(userId, webId, startDate, endDate);
+                    trendData = getHourTrendData( webId, startDate, endDate);
                     break;
                 case "day": // 按天统计
-                    trendData = getDayTrendData(userId, webId, startDate, endDate);
+                    trendData = getDayTrendData( webId, startDate, endDate);
                     break;
                 case "month": // 按月统计
-                    trendData = getMonthTrendData(userId, webId, startDate, endDate);
+                    trendData = getMonthTrendData( webId, startDate, endDate);
                     break;
                 default:
                     throw new IllegalArgumentException("不支持的时间维度类型: " + periodType);
@@ -215,17 +209,16 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         // 实现网站汇总统计计算逻辑
     }
 
-    private void updateDailyStats(Long userId, String webId, Date visitDate) {
+    private void updateDailyStats( String webId, Date visitDate) {
         Date statsDate = getDateStart(visitDate);
         UserDailyStatsEntity stats = dailyStatsMapper.selectOne(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getUserId, userId)
                 .eq(UserDailyStatsEntity::getWebId, webId)
                 .eq(UserDailyStatsEntity::getStatsDate, statsDate)
         );
         
         if (stats == null) {
-            stats = new UserDailyStatsEntity(userId, webId, statsDate);
+            stats = new UserDailyStatsEntity( webId, statsDate);
             stats.setVisitCount(1);
             dailyStatsMapper.insert(stats);
         } else {
@@ -299,7 +292,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     /**
      * 获取小时趋势数据
      */
-    private List<VisitStatsVO.TrendDataVO> getHourTrendData(Long userId, String webId, Date startDate, Date endDate) {
+    private List<VisitStatsVO.TrendDataVO> getHourTrendData( String webId, Date startDate, Date endDate) {
         List<VisitStatsVO.TrendDataVO> result = new ArrayList<>();
         
         // 查询该时间段内的访问记录
@@ -347,7 +340,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     /**
      * 获取日趋势数据
      */
-    private List<VisitStatsVO.TrendDataVO> getDayTrendData(Long userId, String webId, Date startDate, Date endDate) {
+    private List<VisitStatsVO.TrendDataVO> getDayTrendData( String webId, Date startDate, Date endDate) {
         List<VisitStatsVO.TrendDataVO> result = new ArrayList<>();
         
         // 查询每日统计数据
@@ -396,7 +389,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     /**
      * 获取月趋势数据
      */
-    private List<VisitStatsVO.TrendDataVO> getMonthTrendData(Long userId, String webId, Date startDate, Date endDate) {
+    private List<VisitStatsVO.TrendDataVO> getMonthTrendData( String webId, Date startDate, Date endDate) {
         List<VisitStatsVO.TrendDataVO> result = new ArrayList<>();
         
         // 查询网站汇总统计数据

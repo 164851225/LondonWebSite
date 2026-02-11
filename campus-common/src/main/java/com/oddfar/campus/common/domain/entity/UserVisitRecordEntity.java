@@ -62,8 +62,7 @@ public class UserVisitRecordEntity implements Serializable {
     /** 创建时间 */
     private Date createTime;
 
-    public UserVisitRecordEntity(Long userId, String webId, String pageUrl) {
-        this.userId = userId;
+    public UserVisitRecordEntity( String webId, String pageUrl) {
         this.webId = webId;
         this.pageUrl = pageUrl;
         this.visitTime = new Date();

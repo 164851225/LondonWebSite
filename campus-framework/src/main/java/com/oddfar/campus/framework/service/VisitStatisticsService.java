@@ -13,7 +13,7 @@ public interface VisitStatisticsService {
     /**
      * 记录用户访问
      */
-    UserVisitRecordEntity recordVisit(Long userId, String webId, String pageUrl, String pageTitle);
+    UserVisitRecordEntity recordVisit(  String webId, String pageUrl, String pageTitle);
     
     /**
      * 更新用户停留时长
@@ -23,22 +23,22 @@ public interface VisitStatisticsService {
     /**
      * 获取用户今日访问统计
      */
-    VisitStatsVO getUserTodayStats(Long userId, String webId);
+    VisitStatsVO getUserTodayStats( String webId);
     
     /**
      * 获取用户天平均停留时间
      */
-    Double getUserAvgDuration(Long userId, String webId, Date startDate, Date endDate);
+    Double getUserAvgDuration( String webId, Date startDate, Date endDate);
     
     /**
      * 获取本月累计访问及环比
      */
-    VisitStatsVO getMonthlyVisitStats(Long userId, String webId);
+    VisitStatsVO getMonthlyVisitStats( String webId);
     
     /**
      * 获取访问趋势数据
      */
-    List<VisitStatsVO.TrendDataVO> getVisitTrend(Long userId, String webId, String periodType, Date startDate, Date endDate);
+    List<VisitStatsVO.TrendDataVO> getVisitTrend(String webId, String periodType, Date startDate, Date endDate);
     
     /**
      * 统计并更新每日数据

@@ -53,8 +53,7 @@ public class UserDailyStatsEntity implements Serializable {
     /** 更新时间 */
     private Date updateTime;
 
-    public UserDailyStatsEntity(Long userId, String webId, Date statsDate) {
-        this.userId = userId;
+    public UserDailyStatsEntity( String webId, Date statsDate) {
         this.webId = webId;
         this.statsDate = statsDate;
         this.visitCount = 0;
