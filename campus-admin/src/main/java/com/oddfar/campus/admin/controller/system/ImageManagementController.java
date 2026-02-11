@@ -29,7 +29,8 @@ public class ImageManagementController {
      * @return 文件信息
      */
     @PostMapping("/upload")
-    public R uploadFile(@RequestParam("file") MultipartFile file) {
+    @Anonymous
+    public R uploadFile(@RequestPart("file") MultipartFile file) {
         try {
             FileInfoEntity fileInfo = imageManagementService.uploadFile(file);
             return R.ok("上传成功", fileInfo);

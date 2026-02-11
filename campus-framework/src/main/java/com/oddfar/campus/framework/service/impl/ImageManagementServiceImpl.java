@@ -75,7 +75,6 @@ public class ImageManagementServiceImpl implements ImageManagementService {
             fileInfo.setFileExtension(fileExtension);
             fileInfo.setStoragePath(filePath.toString());
             fileInfo.setAccessUrl(urlPrefix + datePath + "/" + newFileName);
-            fileInfo.setCreateUser(SecurityUtils.getUserId());
 
             fileInfoMapper.insert(fileInfo);
             return fileInfo;

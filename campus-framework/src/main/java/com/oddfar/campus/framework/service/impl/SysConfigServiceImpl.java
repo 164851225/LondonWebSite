@@ -99,11 +99,12 @@ public class SysConfigServiceImpl implements SysConfigService {
      */
     @Override
     public boolean selectCaptchaEnabled() {
-        String captchaEnabled = selectConfigByKey("sys.account.captchaEnabled");
-        if (StringUtils.isEmpty(captchaEnabled)) {
-            return true;
-        }
-        return Convert.toBool(captchaEnabled);
+        return false;
+//        String captchaEnabled = selectConfigByKey("sys.account.captchaEnabled");
+//        if (StringUtils.isEmpty(captchaEnabled)) {
+//            return true;
+//        }
+//        return Convert.toBool(captchaEnabled);
     }
 
     @Override
