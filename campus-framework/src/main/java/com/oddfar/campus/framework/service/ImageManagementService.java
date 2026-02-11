@@ -17,4 +17,11 @@ public interface ImageManagementService {
      * @return 是否成功
      */
     boolean saveOrUpdateImagePosition(WebImagePositionEntity entity);
+    
+    /**
+     * 批量上传文件
+     * @param files 文件列表
+     * @return 上传成功的文件信息列表
+     */
+    List<FileInfoEntity> uploadFiles(List<MultipartFile> files);
 }

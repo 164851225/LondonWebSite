@@ -5,6 +5,7 @@ import com.oddfar.campus.common.domain.entity.UserDailyStatsEntity;
 import com.oddfar.campus.common.domain.entity.WebVisitSummaryEntity;
 import com.oddfar.campus.common.domain.vo.VisitStatsVO;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface VisitStatisticsService {
     /**
      * 获取用户天平均停留时间
      */
-    Double getUserAvgDuration( String webId, Date startDate, Date endDate);
+    BigDecimal getUserAvgDuration( String webId, Date startDate, Date endDate);
     
     /**
      * 获取本月累计访问及环比

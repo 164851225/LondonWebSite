@@ -108,7 +108,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     }
 
     @Override
-    public Double getUserAvgDuration( String webId, Date startDate, Date endDate) {
+    public BigDecimal getUserAvgDuration( String webId, Date startDate, Date endDate) {
         List<UserDailyStatsEntity> statsList = dailyStatsMapper.selectList(
             new LambdaQueryWrapper<UserDailyStatsEntity>()
                 .eq(UserDailyStatsEntity::getWebId, webId)
@@ -117,14 +117,14 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         );
         
         if (statsList.isEmpty()) {
-            return 0.0;
+            return BigDecimal.ZERO;
         }
         
-        double totalDuration = statsList.stream()
-            .mapToDouble(stat -> stat.getTotalDuration() != null ? stat.getTotalDuration() : 0)
-            .sum();
+        BigDecimal totalDuration = statsList.stream()
+            .map(stat -> stat.getTotalDuration() != null ? new BigDecimal(stat.getTotalDuration()) : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
             
-        return totalDuration / statsList.size();
+        return totalDuration.divide(new BigDecimal(statsList.size()), 2, RoundingMode.HALF_UP);
     }
 
     @Override

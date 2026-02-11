@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class VisitStatisticsController {
     @PostMapping("/avg-duration")
     public R getAvgDuration(@RequestBody VisitStatsQueryDTO dto) {
         try {
-            Double avgDuration = visitStatisticsService.getUserAvgDuration( dto.getWebId(), dto.getStartDate(), dto.getEndDate());
+            BigDecimal avgDuration = visitStatisticsService.getUserAvgDuration( dto.getWebId(), dto.getStartDate(), dto.getEndDate());
             return R.ok(avgDuration);
         } catch (Exception e) {
             log.error("获取平均时长异常", e);

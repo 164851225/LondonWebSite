@@ -29,7 +29,7 @@ public class ImageManagementController {
      * @return 文件信息
      */
     @PostMapping("/upload")
-    @Anonymous
+//    @Anonymous
     public R uploadFile(@RequestPart("file") MultipartFile file) {
         try {
             FileInfoEntity fileInfo = imageManagementService.uploadFile(file);
@@ -41,11 +41,28 @@ public class ImageManagementController {
     }
 
     /**
+     * 批量上传文件
+     * @param files 上传的文件列表
+     * @return 上传成功的文件信息列表
+     */
+    @PostMapping("/upload/batch")
+//    @Anonymous
+    public R uploadFiles(@RequestParam("files") List<MultipartFile> files) {
+        try {
+            List<FileInfoEntity> fileInfos = imageManagementService.uploadFiles(files);
+            return R.ok("批量上传成功", fileInfos);
+        } catch (Exception e) {
+            log.error("批量文件上传异常", e);
+            return R.error(e.getMessage());
+        }
+    }
+
+    /**
      * 下载文件
      * @param id 文件ID
      */
     @GetMapping("/download/{id}")
-    @Anonymous
+//    @Anonymous
     public void downloadFile(@PathVariable("id") Long id) {
         imageManagementService.downloadFile(id);
     }
@@ -56,7 +73,7 @@ public class ImageManagementController {
      * @return 图片位置信息
      */
     @PostMapping("/position")
-    @Anonymous
+//    @Anonymous
     public R getImageByPosition(@RequestBody ImageQueryDTO dto) {
         try {
             WebImagePositionEntity position = imageManagementService.getImageByPositionCode(dto.getWebId(), dto.getPositionCode());
@@ -73,8 +90,8 @@ public class ImageManagementController {
      * @return 操作结果
      */
     @PostMapping("/add/position")
-    @Anonymous
-    @Log
+//    @Anonymous
+//    @Log
     public R addImageByPosition(@RequestBody ImageQueryDTO dto) {
         try {
             // 参数校验
@@ -108,7 +125,7 @@ public class ImageManagementController {
      * @return 图片位置列表
      */
     @PostMapping("/list")
-    @Anonymous
+//    @Anonymous
     public R getImageList(@RequestBody ImageQueryDTO dto) {
         try {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());

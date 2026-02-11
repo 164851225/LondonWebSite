@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -168,6 +169,82 @@ public class ImageManagementServiceImpl implements ImageManagementService {
         } catch (Exception e) {
             log.error("保存或更新图片位置异常", e);
             throw new ServiceException("保存或更新图片位置失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<FileInfoEntity> uploadFiles(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            throw new ServiceException("上传文件列表不能为空");
+        }
+        
+        List<FileInfoEntity> uploadedFiles = new ArrayList<>();
+        
+        try {
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    log.warn("跳过空文件");
+                    continue;
+                }
+                
+                try {
+                    FileInfoEntity fileInfo = uploadSingleFile(file);
+                    uploadedFiles.add(fileInfo);
+                    log.info("文件上传成功: {}", file.getOriginalFilename());
+                } catch (Exception e) {
+                    log.error("单个文件上传失败: {}", file.getOriginalFilename(), e);
+                    // 继续处理其他文件，不中断整个批量操作
+                }
+            }
+            
+            if (uploadedFiles.isEmpty()) {
+                throw new ServiceException("没有文件上传成功");
+            }
+            
+            return uploadedFiles;
+            
+        } catch (Exception e) {
+            log.error("批量文件上传失败", e);
+            throw new ServiceException("批量文件上传失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 单个文件上传（内部方法）
+     * @param file 文件
+     * @return 文件信息
+     */
+    private FileInfoEntity uploadSingleFile(MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = getFileExtension(originalFilename);
+            String newFileName = UUID.randomUUID().toString() + "." + fileExtension;
+            
+            String datePath = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            Path storagePath = Paths.get(uploadPath, datePath);
+            
+            if (!Files.exists(storagePath)) {
+                Files.createDirectories(storagePath);
+            }
+
+            Path filePath = storagePath.resolve(newFileName);
+            file.transferTo(filePath);
+
+            FileInfoEntity fileInfo = new FileInfoEntity();
+            fileInfo.setFileName(originalFilename);
+            fileInfo.setFilePath(datePath + "/" + newFileName);
+            fileInfo.setFileSize(file.getSize());
+            fileInfo.setFileType(file.getContentType());
+            fileInfo.setFileExtension(fileExtension);
+            fileInfo.setStoragePath(filePath.toString());
+            fileInfo.setAccessUrl(urlPrefix + datePath + "/" + newFileName);
+
+            fileInfoMapper.insert(fileInfo);
+            return fileInfo;
+
+        } catch (Exception e) {
+            throw new ServiceException("文件上传失败: " + e.getMessage());
         }
     }
 
