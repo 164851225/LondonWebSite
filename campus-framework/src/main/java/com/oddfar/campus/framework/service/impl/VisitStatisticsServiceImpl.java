@@ -2,6 +2,7 @@ package com.oddfar.campus.framework.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.oddfar.campus.common.domain.entity.UserVisitRecordEntity;
 import com.oddfar.campus.common.domain.entity.UserDailyStatsEntity;
 import com.oddfar.campus.common.domain.entity.WebVisitSummaryEntity;
@@ -222,8 +223,11 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
             stats.setVisitCount(1);
             dailyStatsMapper.insert(stats);
         } else {
-            stats.setVisitCount(stats.getVisitCount() + 1);
-            dailyStatsMapper.updateById(stats);
+            // 使用数据库原子操作更新访问次数，避免并发问题
+            UpdateWrapper<UserDailyStatsEntity> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("stats_id", stats.getStatsId())
+                         .setSql("visit_count = visit_count + 1");
+            dailyStatsMapper.update(null, updateWrapper);
         }
     }
     
