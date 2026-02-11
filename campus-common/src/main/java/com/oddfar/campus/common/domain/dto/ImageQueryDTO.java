@@ -15,4 +15,16 @@ public class ImageQueryDTO implements Serializable {
     
     /** 位置编码 */
     private String positionCode;
+
+    /** 文件ID */
+    private Long fileId;
+    
+    /** 图片URL */
+    private String imageUrl;
+    
+    /** 图片描述 */
+    private String imageDesc;
+    
+    /** 排序 */
+    private Integer sortOrder;
 }

@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,6 +132,43 @@ public class ImageManagementServiceImpl implements ImageManagementService {
                 .eq(WebImagePositionEntity::getDelFlag, 0)
                 .orderByAsc(WebImagePositionEntity::getSortOrder)
         );
+    }
+
+    @Override
+    @Transactional
+    public boolean saveOrUpdateImagePosition(WebImagePositionEntity entity) {
+        try {
+            // 参数校验
+            if (entity == null || StringUtils.isEmpty(entity.getWebId()) || 
+                StringUtils.isEmpty(entity.getPositionCode())) {
+                throw new ServiceException("参数不完整，缺少必要字段");
+            }
+            
+            // 查询是否存在相同位置的记录
+            WebImagePositionEntity existingPosition = getImageByPositionCode(entity.getWebId(), entity.getPositionCode());
+            
+            if (existingPosition != null) {
+                // 存在则更新
+                entity.setPositionId(existingPosition.getPositionId());
+                entity.setUpdateTime(new Date());
+                webImagePositionMapper.updateById(entity);
+                log.info("更新图片位置成功: webId={}, positionCode={}", entity.getWebId(), entity.getPositionCode());
+            } else {
+                // 不存在则新增
+                entity.setCreateTime(new Date());
+                entity.setStatus(1); // 默认启用
+                entity.setDelFlag(0); // 默认未删除
+                if (entity.getSortOrder() == null) {
+                    entity.setSortOrder(0); // 默认排序
+                }
+                webImagePositionMapper.insert(entity);
+                log.info("新增图片位置成功: webId={}, positionCode={}", entity.getWebId(), entity.getPositionCode());
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("保存或更新图片位置异常", e);
+            throw new ServiceException("保存或更新图片位置失败: " + e.getMessage());
+        }
     }
 
     private String getFileExtension(String fileName) {

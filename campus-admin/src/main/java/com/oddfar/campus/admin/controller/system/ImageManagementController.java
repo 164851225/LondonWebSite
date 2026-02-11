@@ -42,12 +42,12 @@ public class ImageManagementController {
 
     /**
      * 下载文件
-     * @param dto 文件下载请求参数
+     * @param id 文件ID
      */
-    @PostMapping("/download")
+    @GetMapping("/download/{id}")
     @Anonymous
-    public void downloadFile(@RequestBody ImageQueryDTO dto) {
-        imageManagementService.downloadFile(Long.valueOf(dto.getPositionCode()));
+    public void downloadFile(@PathVariable("id") Long id) {
+        imageManagementService.downloadFile(id);
     }
 
     /**
@@ -66,6 +66,41 @@ public class ImageManagementController {
             return R.error(e.getMessage());
         }
     }
+
+    /**
+     * 添加或更新图片位置信息
+     * @param dto 图片位置请求参数
+     * @return 操作结果
+     */
+    @PostMapping("/add/position")
+    @Anonymous
+    @Log
+    public R addImageByPosition(@RequestBody ImageQueryDTO dto) {
+        try {
+            // 参数校验
+            if (dto == null || dto.getWebId() == null || dto.getPositionCode() == null) {
+                return R.error("参数不完整，缺少必要字段");
+            }
+            
+            // 构建实体对象
+            WebImagePositionEntity entity = new WebImagePositionEntity();
+            entity.setWebId(dto.getWebId());
+            entity.setPositionCode(dto.getPositionCode());
+            entity.setImageUrl(dto.getImageUrl());
+            entity.setImageDesc(dto.getImageDesc());
+            entity.setSortOrder(dto.getSortOrder());
+            entity.setFileId(dto.getFileId());
+            
+            // 调用服务层方法进行保存或更新
+            boolean result = imageManagementService.saveOrUpdateImagePosition(entity);
+            
+            return R.ok("图片位置保存成功");
+        } catch (Exception e) {
+            log.error("添加或更新图片位置异常", e);
+            return R.error(e.getMessage());
+        }
+    }
+
 
     /**
      * 获取指定网站的图片列表
