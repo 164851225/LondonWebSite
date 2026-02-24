@@ -9,6 +9,7 @@ import com.oddfar.campus.common.domain.entity.WebImagePositionEntity;
 import com.oddfar.campus.common.enums.BusinessStatus;
 import com.oddfar.campus.framework.service.ImageManagementService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +30,7 @@ public class ImageManagementController {
      * @return 文件信息
      */
     @PostMapping("/upload")
-//    @Anonymous
+    @PreAuthorize("isAuthenticated()")
     public R uploadFile(@RequestPart("file") MultipartFile file) {
         try {
             FileInfoEntity fileInfo = imageManagementService.uploadFile(file);
@@ -46,7 +47,7 @@ public class ImageManagementController {
      * @return 上传成功的文件信息列表
      */
     @PostMapping("/upload/batch")
-//    @Anonymous
+    @PreAuthorize("isAuthenticated()")
     public R uploadFiles(@RequestParam("files") List<MultipartFile> files) {
         try {
             List<FileInfoEntity> fileInfos = imageManagementService.uploadFiles(files);
@@ -62,7 +63,7 @@ public class ImageManagementController {
      * @param id 文件ID
      */
     @GetMapping("/download/{id}")
-//    @Anonymous
+    @PreAuthorize("isAuthenticated()")
     public void downloadFile(@PathVariable("id") Long id) {
         imageManagementService.downloadFile(id);
     }
@@ -73,7 +74,7 @@ public class ImageManagementController {
      * @return 图片位置信息
      */
     @PostMapping("/position")
-//    @Anonymous
+    @PreAuthorize("isAuthenticated()")
     public R getImageByPosition(@RequestBody ImageQueryDTO dto) {
         try {
             WebImagePositionEntity position = imageManagementService.getImageByPositionCode(dto.getWebId(), dto.getPositionCode());
@@ -90,8 +91,7 @@ public class ImageManagementController {
      * @return 操作结果
      */
     @PostMapping("/add/position")
-//    @Anonymous
-//    @Log
+    @PreAuthorize("isAuthenticated()")
     public R addImageByPosition(@RequestBody ImageQueryDTO dto) {
         try {
             // 参数校验
@@ -125,7 +125,7 @@ public class ImageManagementController {
      * @return 图片位置列表
      */
     @PostMapping("/list")
-//    @Anonymous
+    @PreAuthorize("isAuthenticated()")
     public R getImageList(@RequestBody ImageQueryDTO dto) {
         try {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());

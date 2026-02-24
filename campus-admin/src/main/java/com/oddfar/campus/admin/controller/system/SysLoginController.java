@@ -6,17 +6,25 @@ import com.oddfar.campus.common.domain.R;
 import com.oddfar.campus.common.domain.entity.SysMenuEntity;
 import com.oddfar.campus.common.domain.entity.SysUserEntity;
 import com.oddfar.campus.common.domain.model.LoginBody;
+import com.oddfar.campus.common.domain.model.LoginUser;
 import com.oddfar.campus.common.enums.ResBizTypeEnum;
 import com.oddfar.campus.common.utils.SecurityUtils;
+import com.oddfar.campus.framework.mapper.SysRoleMenuMapper;
+import com.oddfar.campus.framework.security.context.AuthenticationContextHolder;
 import com.oddfar.campus.framework.service.SysMenuService;
+import com.oddfar.campus.framework.service.SysUserService;
 import com.oddfar.campus.framework.web.service.SysLoginService;
 import com.oddfar.campus.framework.web.service.SysPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +39,12 @@ public class SysLoginController {
 
     @Autowired
     private SysPermissionService permissionService;
-
+    @Resource
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private SysUserService sysUserService;
+    @Autowired
+    private SysRoleMenuMapper sysRoleMenuMapper;
     /**
      * 登录方法
      *
@@ -45,6 +58,18 @@ public class SysLoginController {
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
         r.put(Constants.TOKEN, token);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginBody.getUsername(), loginBody.getPassword());
+        AuthenticationContextHolder.setContext(authenticationToken);
+        Authentication authenticate = authenticationManager.authenticate(authenticationToken);
+        LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
+
+        SysUserEntity sysUserEntity = sysUserService.selectUserById(loginUser.getUserId());
+        List<SysMenuEntity> menus = menuService.selectMenuList(sysUserEntity.getUserId());
+        r.put("user", sysUserEntity);
+        r.put("roles", sysUserEntity.getRoles());
+        r.put("menu", menus);
+
+//        sysUserService.noFirstLogin(sysUserEntity.getUserId());
         return r;
     }
 

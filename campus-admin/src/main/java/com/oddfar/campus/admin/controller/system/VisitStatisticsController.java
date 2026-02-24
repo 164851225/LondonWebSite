@@ -10,6 +10,7 @@ import com.oddfar.campus.common.domain.vo.VisitStatsVO;
 import com.oddfar.campus.common.enums.BusinessStatus;
 import com.oddfar.campus.framework.service.VisitStatisticsService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -31,6 +32,7 @@ public class VisitStatisticsController {
      * @return 访问记录ID
      */
     @PostMapping("/record")
+    @PreAuthorize("isAuthenticated()")
     public R recordVisit(@RequestBody VisitRecordDTO dto) {
         try {
             UserVisitRecordEntity record = visitStatisticsService.recordVisit( dto.getWebId(), dto.getPageUrl(), dto.getPageTitle());
@@ -47,6 +49,7 @@ public class VisitStatisticsController {
      * @return 操作结果
      */
     @PostMapping("/heartbeat")
+    @PreAuthorize("isAuthenticated()")
     public R heartbeat(@RequestBody HeartbeatDTO dto) {
         try {
             visitStatisticsService.updateDuration(dto.getVisitId(), dto.getDuration());
@@ -63,6 +66,7 @@ public class VisitStatisticsController {
      * @return 今日访问统计数据
      */
     @PostMapping("/today-stats")
+    @PreAuthorize("isAuthenticated()")
     public R getTodayStats(@RequestBody VisitStatsQueryDTO dto) {
         try {
             VisitStatsVO stats = visitStatisticsService.getUserTodayStats( dto.getWebId());
@@ -95,6 +99,7 @@ public class VisitStatisticsController {
      * @return 月度访问统计数据
      */
     @PostMapping("/monthly-stats")
+    @PreAuthorize("isAuthenticated()")
     public R getMonthlyStats(@RequestBody VisitStatsQueryDTO dto) {
         try {
             VisitStatsVO stats = visitStatisticsService.getMonthlyVisitStats( dto.getWebId());
@@ -111,6 +116,7 @@ public class VisitStatisticsController {
      * @return 访问趋势数据
      */
     @PostMapping("/trend")
+    @PreAuthorize("isAuthenticated()")
     public R getVisitTrend(@RequestBody VisitStatsQueryDTO dto) {
         try {
             List<VisitStatsVO.TrendDataVO> trendData = visitStatisticsService.getVisitTrend(
