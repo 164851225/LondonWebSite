@@ -71,15 +71,25 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     public void updateDuration(Long visitId, Integer duration) {
         try {
             UserVisitRecordEntity record = visitRecordMapper.selectById(visitId);
-            if (record != null && duration > 5 * 60) { // 超过5分钟不计入
-                duration = 5 * 60;
+            
+            if (record == null) {
+                // 如果记录不存在，创建新记录
+                record = new UserVisitRecordEntity();
+                record.setVisitId(visitId);
+                record.setDuration(duration);
+                record.setVisitTime(new Date());
+                record.setLeaveTime(new Date());
+                record.setWebId("1");
+                visitRecordMapper.insert(record);
+            } else {
+                record.setDuration(duration+record.getDuration());
+                record.setVisitTime(new Date());
+                record.setLeaveTime(new Date());
+                visitRecordMapper.updateById(record);
             }
-            record.setDuration(duration);
-            record.setLeaveTime(new Date());
-            visitRecordMapper.updateById(record);
             
             // 更新当日统计数据
-            updateDailyStats( record.getWebId(), record.getVisitTime());
+            updateDailyStats(record.getWebId(), record.getVisitTime());
         } catch (Exception e) {
             log.error("更新停留时长失败", e);
         }

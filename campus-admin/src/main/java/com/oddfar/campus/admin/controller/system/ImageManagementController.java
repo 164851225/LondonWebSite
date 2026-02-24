@@ -63,7 +63,7 @@ public class ImageManagementController {
      * @param id 文件ID
      */
     @GetMapping("/download/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @Anonymous
     public void downloadFile(@PathVariable("id") Long id) {
         imageManagementService.downloadFile(id);
     }
@@ -125,7 +125,7 @@ public class ImageManagementController {
      * @return 图片位置列表
      */
     @PostMapping("/list")
-    @PreAuthorize("isAuthenticated()")
+    @Anonymous
     public R getImageList(@RequestBody ImageQueryDTO dto) {
         try {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());

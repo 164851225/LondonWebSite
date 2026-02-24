@@ -3,6 +3,7 @@ package com.oddfar.campus.admin.controller.system;
 import com.oddfar.campus.common.annotation.ApiResource;
 import com.oddfar.campus.common.domain.R;
 import com.oddfar.campus.common.domain.entity.SysUserEntity;
+import com.oddfar.campus.common.domain.model.LoginBodyV2;
 import com.oddfar.campus.common.domain.model.LoginUser;
 import com.oddfar.campus.common.enums.ResBizTypeEnum;
 import com.oddfar.campus.common.utils.SecurityUtils;
@@ -81,7 +82,9 @@ public class SysProfileController {
      * 重置密码
      */
     @PutMapping(value = "/updatePwd", name = "个人信息管理-重置密码")
-    public R updatePwd(String oldPassword, String newPassword) {
+    public R updatePwd(@RequestBody LoginBodyV2 loginBody) {
+        String oldPassword = loginBody.getOldPassword();
+        String newPassword = loginBody.getNewPassword();
         SysUserEntity user = userMapper.selectById(SecurityUtils.getUserId());
 //        LoginUser loginUser = getLoginUser();
         String userName = user.getUserName();
