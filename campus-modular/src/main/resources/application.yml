@@ -8,7 +8,7 @@ campus:
 server:
   port: 8160
   servlet:
-    context-path: /back/api
+    context-path: /back/api/
 
 spring:
   application:

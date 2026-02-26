@@ -129,6 +129,22 @@ public class ImageManagementController {
     public R getImageList(@RequestBody ImageQueryDTO dto) {
         try {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());
+            list.stream().sorted((a, b) -> {
+                String[] partsA = a.getPositionCode().split("-");
+                String[] partsB = a.getPositionCode().split("-");
+
+                int groupA = Integer.parseInt(partsA[0]);
+                int groupB = Integer.parseInt(partsB[0]);
+
+                if (groupA != groupB) {
+                    return Integer.compare(groupA, groupB);
+                }
+
+                int numA = Integer.parseInt(partsA[1]);
+                int numB = Integer.parseInt(partsB[1]);
+                return Integer.compare(numA, numB);
+            });
+
             return R.ok(list);
         } catch (Exception e) {
             log.error("获取网站图片列表异常", e);
