@@ -14,7 +14,7 @@ spring:
   application:
     name: ${campus.name}
   profiles:
-    active: prod
+    active: dev
   # 文件上传
   servlet:
     multipart:

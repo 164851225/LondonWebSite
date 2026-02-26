@@ -129,7 +129,7 @@ public class ImageManagementController {
     public R getImageList(@RequestBody ImageQueryDTO dto) {
         try {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());
-            list.stream().sorted((a, b) -> {
+            list.sort((a, b) -> {
                 String[] partsA = a.getPositionCode().split("-");
                 String[] partsB = a.getPositionCode().split("-");
 
@@ -144,6 +144,7 @@ public class ImageManagementController {
                 int numB = Integer.parseInt(partsB[1]);
                 return Integer.compare(numA, numB);
             });
+
 
             return R.ok(list);
         } catch (Exception e) {
