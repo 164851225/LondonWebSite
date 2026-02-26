@@ -7,12 +7,14 @@ campus:
 
 server:
   port: 8160
+  servlet:
+    context-path: /back/api
 
 spring:
   application:
     name: ${campus.name}
   profiles:
-    active: dev
+    active: prod
   # 文件上传
   servlet:
     multipart:

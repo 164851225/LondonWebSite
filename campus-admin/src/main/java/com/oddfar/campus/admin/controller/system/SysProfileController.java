@@ -104,6 +104,10 @@ public class SysProfileController {
         return R.error("修改密码异常，请联系管理员");
     }
 
+    public static void main(String[] args) {
+        String s = SecurityUtils.encryptPassword("123456");
+        System.out.println(s);
+    }
     /**
      * 头像上传
      */
