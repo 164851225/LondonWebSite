@@ -16,4 +16,10 @@
         <result property="browser" column="browser"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
+
+    <select id="totalAvgDuration" resultType="java.lang.Double">
+        select avg(duration)
+        from user_visit_record
+        where duration > 0
+    </select>
 </mapper>

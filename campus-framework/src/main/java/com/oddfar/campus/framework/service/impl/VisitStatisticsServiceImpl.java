@@ -16,6 +16,7 @@ import com.oddfar.campus.framework.mapper.WebVisitSummaryMapper;
 import com.oddfar.campus.framework.service.VisitStatisticsService;
 import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,6 +96,8 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         }
     }
 
+    @Autowired
+    private UserVisitRecordMapper userVisitRecordMapper;
     @Override
     public VisitStatsVO getUserTodayStats( String webId) {
         Date today = getToday();
@@ -107,12 +110,11 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         VisitStatsVO vo = new VisitStatsVO();
         vo.setWebId(webId);
         vo.setStatsDate(today);
-        
+        Double l = userVisitRecordMapper.totalAvgDuration();
         if (todayStats != null) {
             vo.setTodayVisitCount(todayStats.getVisitCount());
             vo.setTodayTotalDuration(todayStats.getTotalDuration());
-            vo.setTodayAvgDuration(todayStats.getAvgDuration() != null ? 
-                todayStats.getAvgDuration().doubleValue() : 0.0);
+            vo.setTodayAvgDuration(l != null ? l : 0.0);
         }
         
         return vo;
@@ -120,22 +122,23 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
 
     @Override
     public BigDecimal getUserAvgDuration( String webId, Date startDate, Date endDate) {
-        List<UserDailyStatsEntity> statsList = dailyStatsMapper.selectList(
-            new LambdaQueryWrapper<UserDailyStatsEntity>()
-                .eq(UserDailyStatsEntity::getWebId, webId)
-                .ge(UserDailyStatsEntity::getStatsDate, startDate)
-                .le(UserDailyStatsEntity::getStatsDate, endDate)
-        );
+//        List<UserDailyStatsEntity> statsList = dailyStatsMapper.selectList(
+//            new LambdaQueryWrapper<UserDailyStatsEntity>()
+//                .eq(UserDailyStatsEntity::getWebId, webId)
+//                .ge(UserDailyStatsEntity::getStatsDate, startDate)
+//                .le(UserDailyStatsEntity::getStatsDate, endDate)
+//        );
         
-        if (statsList.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
-        
-        BigDecimal totalDuration = statsList.stream()
-            .map(stat -> stat.getTotalDuration() != null ? new BigDecimal(stat.getTotalDuration()) : BigDecimal.ZERO)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+//        if (statsList.isEmpty()) {
+//            return BigDecimal.ZERO;
+//        }
+        Double l = userVisitRecordMapper.totalAvgDuration();
+
+//        BigDecimal totalDuration = statsList.stream()
+//            .map(stat -> stat.getTotalDuration() != null ? new BigDecimal(stat.getTotalDuration()) : BigDecimal.ZERO)
+//            .reduce(BigDecimal.ZERO, BigDecimal::add);
             
-        return totalDuration.divide(new BigDecimal(statsList.size()), 2, RoundingMode.HALF_UP);
+        return new BigDecimal(l).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -407,16 +410,16 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
         List<VisitStatsVO.TrendDataVO> result = new ArrayList<>();
         
         // 查询网站汇总统计数据
-        List<WebVisitSummaryEntity> monthlyStats = webSummaryMapper.selectList(
-            new LambdaQueryWrapper<WebVisitSummaryEntity>()
-                .eq(WebVisitSummaryEntity::getWebId, webId)
-                .ge(WebVisitSummaryEntity::getStatsDate, startDate)
-                .le(WebVisitSummaryEntity::getStatsDate, endDate)
-                .orderByAsc(WebVisitSummaryEntity::getStatsDate)
+        List<UserDailyStatsEntity> dailyStats = dailyStatsMapper.selectList(
+                new LambdaQueryWrapper<UserDailyStatsEntity>()
+                        .eq(UserDailyStatsEntity::getWebId, webId)
+                        .ge(UserDailyStatsEntity::getStatsDate, startDate)
+                        .le(UserDailyStatsEntity::getStatsDate, endDate)
+                        .orderByAsc(UserDailyStatsEntity::getStatsDate)
         );
         
         // 按月份分组
-        Map<String, List<WebVisitSummaryEntity>> monthlyMap = monthlyStats.stream()
+        Map<String, List<UserDailyStatsEntity>> monthlyMap = dailyStats.stream()
             .collect(Collectors.groupingBy(summary -> {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(summary.getStatsDate());
@@ -432,25 +435,20 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
             VisitStatsVO.TrendDataVO trendItem = new VisitStatsVO.TrendDataVO();
             trendItem.setTimeLabel(monthKey);
             
-            List<WebVisitSummaryEntity> monthStats = monthlyMap.getOrDefault(monthKey, new ArrayList<>());
+            List<UserDailyStatsEntity> monthStats = monthlyMap.getOrDefault(monthKey, new ArrayList<>());
             if (!monthStats.isEmpty()) {
                 int totalVisits = monthStats.stream()
-                    .mapToInt(WebVisitSummaryEntity::getTotalVisits)
-                    .sum();
-                int uniqueUsers = monthStats.stream()
-                    .mapToInt(WebVisitSummaryEntity::getUniqueUsers)
+                    .mapToInt(UserDailyStatsEntity::getVisitCount)
                     .sum();
                 int totalDuration = monthStats.stream()
-                    .mapToInt(WebVisitSummaryEntity::getTotalDuration)
+                    .mapToInt(UserDailyStatsEntity::getTotalDuration)
                     .sum();
                 
                 trendItem.setVisitCount(totalVisits);
-                trendItem.setUniqueUsers(uniqueUsers);
                 trendItem.setTotalDuration(totalDuration);
                 trendItem.setAvgDuration(totalVisits > 0 ? (double) totalDuration / totalVisits : 0.0);
             } else {
                 trendItem.setVisitCount(0);
-                trendItem.setUniqueUsers(0);
                 trendItem.setTotalDuration(0);
                 trendItem.setAvgDuration(0.0);
             }
