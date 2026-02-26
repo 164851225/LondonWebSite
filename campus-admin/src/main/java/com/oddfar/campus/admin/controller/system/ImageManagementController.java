@@ -131,7 +131,7 @@ public class ImageManagementController {
             List<WebImagePositionEntity> list = imageManagementService.getImageListByWebId(dto.getWebId());
             list.sort((a, b) -> {
                 String[] partsA = a.getPositionCode().split("-");
-                String[] partsB = a.getPositionCode().split("-");
+                String[] partsB = b.getPositionCode().split("-");
 
                 int groupA = Integer.parseInt(partsA[0]);
                 int groupB = Integer.parseInt(partsB[0]);

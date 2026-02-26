@@ -89,8 +89,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
                 visitRecordMapper.updateById(record);
             }
             
-            // 更新当日统计数据
-            updateDailyStats(record.getWebId(), record.getVisitTime());
+
         } catch (Exception e) {
             log.error("更新停留时长失败", e);
         }
